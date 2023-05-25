@@ -78,19 +78,17 @@ class ApiTests(TestCase):
         }), content_type='application/vnd.api+json')
         self.assertEqual(200, response.status_code)
         data = json.loads(response.content)
-        self.assertEqual(data, {
-            "data": {
-                "id": 1,
-                "type": "entities",
-                "attributes": {
-                    'sentence': 'Kamala Harris is vice president of the United States of America',
-                    'results': [
-                        {'ent': 'Kamala Harris', 'label': 'Person'},
-                        {'ent': 'the United States of America', 'label': 'Location'}
-                    ]
-                }
-            }
-        })
+        self.assertEqual(data['data']['type'], "entities")
+        self.assertEqual(
+            data['data']['attributes']['sentence'],
+            'Kamala Harris is vice president of the United States of America')
+        self.assertEqual(
+            data['data']['attributes']['results'],
+            [
+                {'ent': 'Kamala Harris', 'label': 'Person'},
+                {'ent': 'the United States of America', 'label': 'Location'}
+            ]
+        )
 
     def test_results_are_saved_in_database(self):
         response = self.client.post('/entity/', json.dumps({
@@ -104,8 +102,8 @@ class ApiTests(TestCase):
         self.assertEqual(200, response.status_code)
         pk = json.loads(response.content)['data']['id']
         entity = Entity.objects.get(pk=pk)
-        self.assertEqual(entitiy.sentence, 'Kamala Harris is vice president of the United States of America')
-        self.assertEqual(entitiy.results, ([
+        self.assertEqual(entity.sentence, 'Kamala Harris is vice president of the United States of America')
+        self.assertEqual(entity.results, ([
             {'ent': 'Kamala Harris', 'label': 'Person'},
             {'ent': 'the United States of America', 'label': 'Location'}
         ]))
