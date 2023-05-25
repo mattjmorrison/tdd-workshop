@@ -89,3 +89,21 @@ class ApiTests(TestCase):
                 }
             }
         })
+
+    def test_results_are_saved_in_database(self):
+        response = self.client.post('/entity/', json.dumps({
+            "data": {
+                "type": "entities",
+                "attributes": {
+                    'sentence': 'Kamala Harris is vice president of the United States of America'
+                }
+            }
+        }), content_type='application/vnd.api+json')
+        self.assertEqual(200, response.status_code)
+        pk = json.loads(response.content)['data']['id']
+        entity = Entity.objects.get(pk=pk)
+        self.assertEqual(entitiy.sentence, 'Kamala Harris is vice president of the United States of America')
+        self.assertEqual(entitiy.results, ([
+            {'ent': 'Kamala Harris', 'label': 'Person'},
+            {'ent': 'the United States of America', 'label': 'Location'}
+        ]))
