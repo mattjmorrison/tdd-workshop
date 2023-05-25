@@ -13,7 +13,7 @@ class NamedEntityClient:
             'PERSON': 'Person',
             'NORP': 'Group',
             'LOC': 'Location',
-            'GEP': 'Location',
+            'GPE': 'Location',
             'LANGUAGE': 'Language',
         }
         return label_map[label]

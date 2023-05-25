@@ -20,5 +20,5 @@ from sampleapp.views import GetNamedEnts
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('ner', GetNamedEnts.as_view())
+    path('entity/', GetNamedEnts.as_view())
 ]

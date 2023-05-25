@@ -56,13 +56,36 @@ class Test(TestCase):
 class ApiTests(TestCase):
 
     def test_ner_endpoint_given_json_body_returns_200(self):
-        response = self.client.post('/ner', {"sentence": "Steve Malkmus is in a good band."})
+        response = self.client.post('/entity/', json.dumps({
+            "data": {
+                "type": "entities",
+                "attributes": {
+                    "sentence": "Steve Malkmus is in a good band."
+                }
+            }
+        }), content_type='application/vnd.api+json')
         self.assertEqual(200, response.status_code)
 
     def test_ner_enpoint_given_json_body_with_known_entities_returns_entity_result_in_response(self):
-        response = self.client.post('/ner', {'sentence': 'Kamala Harris'})
+        response = self.client.post('/entity/', json.dumps({
+            "data": {
+                "type": "entities",
+                "attributes": {
+                    'sentence': 'Kamala Harris is vice president of the United States of America'
+                }
+            }
+        }), content_type='application/vnd.api+json')
         self.assertEqual(200, response.status_code)
         data = json.loads(response.content)
-        self.assertGreater(len(data['entities']), 0)
-        self.assertEqual(data['entities'][0]['ent'], 'Kamala Harris')
-        self.assertEqual(data['entities'][0]['label'], 'Person')
+        self.assertEqual(data, {
+            "data": {
+                "type": "entities",
+                "attributes": {
+                    'sentence': 'Kamala Harris is vice president of the United States of America',
+                    'results': [
+                        {'ent': 'Kamala Harris', 'label': 'Person'},
+                        {'ent': 'the United States of America', 'label': 'Location'}
+                    ]
+                }
+            }
+        })
