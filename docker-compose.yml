@@ -1,0 +1,36 @@
+version: '3'
+services:
+  postgres:
+    image: postgres
+    init: True
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    networks:
+      - postgres
+  shell:
+    build: .
+    init: True
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./django/project:/code
+    depends_on:
+      - postgres
+    networks:
+      - postgres
+  test:
+    build: .
+    init: True
+    stdin_open: true
+    tty: true
+    entrypoint: python3 manage.py test
+    volumes:
+      - ./django/project:/code
+    depends_on:
+      - postgres
+    networks:
+      - postgres
+networks:
+  postgres:
+    driver: bridge
+
