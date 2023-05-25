@@ -1,6 +1,7 @@
 from django.test import TestCase
 import json
 from sampleapp.named_entity import NamedEntityClient
+from sampleapp.models import Entity
 
 
 class NerModelTestDouble:
@@ -79,6 +80,7 @@ class ApiTests(TestCase):
         data = json.loads(response.content)
         self.assertEqual(data, {
             "data": {
+                "id": 1,
                 "type": "entities",
                 "attributes": {
                     'sentence': 'Kamala Harris is vice president of the United States of America',

@@ -15,6 +15,7 @@ class GetNamedEnts(View):
         result = client.get_ents(sentence)
         return HttpResponse(json.dumps({
             "data": {
+                "id": 1,
                 "type": "entities",
                 "attributes": {
                     "sentence": sentence,
