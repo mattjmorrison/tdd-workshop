@@ -1,48 +1,18 @@
-from django.views.generic import View
-import json
-from django.http import HttpResponse
-
 from sampleapp.models import Entity
 
+from rest_framework import viewsets
+from rest_framework_json_api import serializers
 
-class GetNamedEnts(View):
 
-    def post(self, request):
-        sentence = json.loads(request.body)['data']['attributes']['sentence']
-        entity = Entity.objects.create(sentence=sentence)
-        return HttpResponse(json.dumps({
-            "data": self._serialize(entity)
-        }))
+class EntitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Entity
+        fields = '__all__'
 
-    def get(self, request, pk=None):
-        if pk:
-            entity = Entity.objects.get(pk=pk)
-            return HttpResponse(json.dumps({
-                'data': self._serialize(entity)
-            }))
-        else:
-            return HttpResponse(json.dumps({
-                'data': [self._serialize(e) for e in Entity.objects.all()]
-            }))
 
-    def _serialize(self, entity):
-        return {
-            'type': 'entities',
-            'id': entity.pk,
-            'attributes': {
-                'sentence': entity.sentence,
-                'results': entity.results,
-            }
-        }
+class GetNamedEnts(viewsets.ModelViewSet):
+    serializer_class = EntitySerializer
 
-    def delete(self, request, pk):
-        Entity.objects.filter(pk=pk).delete()
-        return HttpResponse(status=204)
+    def get_queryset(self):
+        return Entity.objects.all()
 
-    def patch(self, request, pk):
-        entity = Entity.objects.get(pk=pk)
-        entity.sentence = json.loads(request.body)['data']['attributes']['sentence']
-        entity.save()
-        return HttpResponse(json.dumps({
-            'data': self._serialize(entity)
-        }))

@@ -9,5 +9,5 @@ import spacy
 def process_entity(sender, instance, **kwargs):
     ner = spacy.load('en_core_web_sm')
     client = NamedEntityClient(ner)
-    instance.results = client.get_ents(instance.sentence)['ents']
+    instance.output = client.get_ents(instance.sentence)['ents']
 

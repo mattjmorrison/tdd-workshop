@@ -17,9 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from sampleapp.views import GetNamedEnts
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register('entity', GetNamedEnts, basename='entities')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('entity/', GetNamedEnts.as_view()),
-    path('entity/<int:pk>/', GetNamedEnts.as_view())
-]
+] + router.urls
