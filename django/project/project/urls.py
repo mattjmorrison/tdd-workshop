@@ -20,5 +20,6 @@ from sampleapp.views import GetNamedEnts
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('entity/', GetNamedEnts.as_view())
+    path('entity/', GetNamedEnts.as_view()),
+    path('entity/<int:pk>/', GetNamedEnts.as_view())
 ]
