@@ -12,6 +12,11 @@ services:
     init: True
     stdin_open: true
     tty: true
+    environment:
+      - DB_NAME=postgres
+      - DB_USER=postgres
+      - DB_HOST=postgres
+      - DB_PORT=5432
     volumes:
       - ./django/project:/code
     depends_on:
@@ -24,6 +29,11 @@ services:
     stdin_open: true
     tty: true
     entrypoint: python3 manage.py test
+    environment:
+      - DB_NAME=postgres
+      - DB_USER=postgres
+      - DB_HOST=postgres
+      - DB_PORT=5432
     volumes:
       - ./django/project:/code
     depends_on:
