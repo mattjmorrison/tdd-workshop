@@ -15,5 +15,6 @@ class NamedEntityClient:
             'LOC': 'Location',
             'GPE': 'Location',
             'LANGUAGE': 'Language',
+            'CARDINAL': 'Location',
         }
         return label_map[label]

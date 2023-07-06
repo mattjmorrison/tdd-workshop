@@ -40,6 +40,47 @@ services:
       - postgres
     networks:
       - postgres
+  runserver:
+    build: .
+    init: True
+    stdin_open: true
+    tty: true
+    entrypoint: bash -c "python3 manage.py migrate &&
+      python3 manage.py runserver 0.0.0.0:8000"
+    environment:
+      - DOCKER=true
+      - DB_NAME=postgres
+      - DB_USER=postgres
+      - DB_HOST=postgres
+      - DB_PORT=5432
+    ports:
+      - 8000:8000
+    volumes:
+      - ./django/project:/code
+    depends_on:
+      - postgres
+    networks:
+      - postgres
+  testserver:
+    build: .
+    init: True
+    stdin_open: true
+    tty: true
+    entrypoint: python3 manage.py testserver sampleapp/fixtures/test_data.json --addrport 0.0.0.0:8000 --noinput
+    ports:
+      - 8000:8000
+    environment:
+      - DOCKER=true
+      - DB_NAME=postgres
+      - DB_USER=postgres
+      - DB_HOST=postgres
+      - DB_PORT=5432
+    volumes:
+      - ./django/project:/code
+    depends_on:
+      - postgres
+    networks:
+      - postgres
 networks:
   postgres:
     driver: bridge
