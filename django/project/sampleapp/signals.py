@@ -1,6 +1,6 @@
 from django.db.models.signals import pre_save
 from sampleapp.named_entity import NamedEntityClient
-from sampleapp.models import Entity
+from sampleapp.models.entity import Entity
 from django.dispatch import receiver
 import spacy
 

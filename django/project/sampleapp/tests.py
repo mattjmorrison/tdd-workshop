@@ -1,7 +1,7 @@
 from django.test import TestCase
 import json
 from sampleapp.named_entity import NamedEntityClient
-from sampleapp.models import Entity
+from sampleapp.models.entity import Entity
 
 
 class NerModelTestDouble:
