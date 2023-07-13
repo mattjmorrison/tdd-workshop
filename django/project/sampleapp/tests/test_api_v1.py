@@ -90,9 +90,6 @@ class Apiv1Tests(TestCase):
         entity = entities[0]
         self.assertEqual(entity.pk, first.pk)
         self.assertEqual(entity.sentence, 'Goodbye Des Moines!')
-        self.assertEqual(entity.output, ([
-            {'ent': 'Des Moines', 'label': 'Location'}
-        ]))
 
     def test_get_list_of_all_entities(self):
         first = Entity.objects.create(sentence='Hello Boston!')

@@ -5,18 +5,6 @@ from sampleapp.models.entity import Entity
 
 class Apiv2Tests(TestCase):
 
-    def test_houston(self):
-        response = self.client.post('/entity/', json.dumps({
-            "data": {
-                "type": "entities",
-                "attributes": {
-                    "sentence": "Goodbye Houston"
-                }
-            }
-        }), content_type='application/vnd.api+json')
-        self.assertEqual(201, response.status_code, response.content)
-        data = json.loads(response.content)
-
     def test_ner_endpoint_given_json_body_returns_200(self):
         response = self.client.post('/entity/', json.dumps({
             "data": {
@@ -25,8 +13,12 @@ class Apiv2Tests(TestCase):
                     "sentence": "Steve Malkmus is in a good band."
                 }
             }
-        }), content_type='application/vnd.api+json')
+        }),
+        content_type='application/vnd.api+json',
+        HTTP_X_IMTAPPS_API_VERSION='2.0')
         self.assertEqual(201, response.status_code, response.content)
+        data = json.loads(response.content)
+        self.assertNotIn('output', data['data']['attributes'])
 
     def test_ner_enpoint_given_json_body_with_known_entities_returns_entity_result_in_response(self):
         response = self.client.post('/entity/', json.dumps({
@@ -36,7 +28,8 @@ class Apiv2Tests(TestCase):
                     'sentence': 'Kamala Harris is vice president of the United States of America'
                 }
             }
-        }), content_type='application/vnd.api+json')
+        }), content_type='application/vnd.api+json',
+        HTTP_X_IMTAPPS_API_VERSION='2.0')
         self.assertEqual(201, response.status_code)
         data = json.loads(response.content)
         self.assertEqual(data['data']['type'], "entities")
@@ -52,20 +45,27 @@ class Apiv2Tests(TestCase):
                     'sentence': 'Kamala Harris is vice president of the United States of America'
                 }
             }
-        }), content_type='application/vnd.api+json')
+        }),
+        content_type='application/vnd.api+json',
+        HTTP_X_IMTAPPS_API_VERSION='2.0')
         self.assertEqual(201, response.status_code)
         pk = json.loads(response.content)['data']['id']
         entity = Entity.objects.get(pk=pk)
         self.assertEqual(entity.sentence, 'Kamala Harris is vice president of the United States of America')
-        # TODO - this will change
-        self.assertEqual(entity.output, ([
-            {'ent': 'Kamala Harris', 'label': 'Person'},
-            {'ent': 'the United States of America', 'label': 'Location'}
-        ]))
+        segments = entity.segment_set.all().order_by('label')
+        self.assertEqual(2, len(segments))
+        s1, s2 = segments
+        self.assertEqual(s1.ent, 'the United States of America')
+        self.assertEqual(s1.label, 'Location')
+        self.assertEqual(s2.ent, 'Kamala Harris')
+        self.assertEqual(s2.label, 'Person')
 
     def test_get_existing_entity(self):
         e = Entity.objects.create(sentence='Hello Boston!')
-        response = self.client.get(f'/entity/{e.pk}/', content_type='application/vnd.api+json')
+        response = self.client.get(
+            f'/entity/{e.pk}/',
+            content_type='application/vnd.api+json',
+            HTTP_X_IMTAPPS_API_VERSION='2.0')
         self.assertEqual(200, response.status_code)
         data = json.loads(response.content)
         self.assertEqual(data['data']['type'], "entities")
@@ -76,14 +76,20 @@ class Apiv2Tests(TestCase):
 
     def test_delete_existing_entity(self):
         e = Entity.objects.create(sentence='Hello Boston!')
-        response = self.client.delete(f'/entity/{e.pk}/', content_type='application/vnd.api+json')
+        response = self.client.delete(
+            f'/entity/{e.pk}/',
+            content_type='application/vnd.api+json',
+            HTTP_X_IMTAPPS_API_VERSION='2.0')
         self.assertEqual(204, response.status_code)
         self.assertEqual(0, Entity.objects.filter(pk=e.pk).count())
 
     def test_only_deletes_what_was_requested(self):
         first = Entity.objects.create(sentence='Hello Boston!')
         second = Entity.objects.create(sentence='Hello Philly!')
-        response = self.client.delete(f'/entity/{first.pk}/', content_type='application/vnd.api+json')
+        response = self.client.delete(
+            f'/entity/{first.pk}/',
+            content_type='application/vnd.api+json',
+            HTTP_X_IMTAPPS_API_VERSION='2.0')
         self.assertEqual(204, response.status_code)
         self.assertEqual(0, Entity.objects.filter(pk=first.pk).count())
         self.assertEqual(1, Entity.objects.filter(pk=second.pk).count())
@@ -98,7 +104,9 @@ class Apiv2Tests(TestCase):
                     "sentence": "Goodbye Des Moines!"
                 }
             }
-        }), content_type='application/vnd.api+json')
+        }),
+        HTTP_X_IMTAPPS_API_VERSION='2.0',
+        content_type='application/vnd.api+json')
         self.assertEqual(200, response.status_code)
         data = json.loads(response.content)
         self.assertEqual(data['data']['type'], "entities")
@@ -111,15 +119,18 @@ class Apiv2Tests(TestCase):
         entity = entities[0]
         self.assertEqual(entity.pk, first.pk)
         self.assertEqual(entity.sentence, 'Goodbye Des Moines!')
-        # TODO - this will need to change
-        self.assertEqual(entity.output, ([
-            {'ent': 'Des Moines', 'label': 'Location'}
-        ]))
+        self.assertEqual(
+            [{'ent': e.ent, 'label': e.label} for e in entity.segment_set.all()],
+            [{'ent': 'Des Moines', 'label': 'Location'}]
+        )
 
     def test_get_list_of_all_entities(self):
         first = Entity.objects.create(sentence='Hello Boston!')
         second = Entity.objects.create(sentence='Hello Des Moines!')
-        response = self.client.get('/entity/', content_type='application/vnd.api+json')
+        response = self.client.get(
+            '/entity/',
+            HTTP_X_IMTAPPS_API_VERSION='2.0',
+            content_type='application/vnd.api+json')
         self.assertEqual(200, response.status_code)
         data = json.loads(response.content)['data']
         self.assertEqual(2, len(data))
