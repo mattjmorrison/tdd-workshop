@@ -28,7 +28,7 @@ services:
     init: True
     stdin_open: true
     tty: true
-    entrypoint: python3 manage.py test
+    entrypoint: python3 manage.py test --noinput
     environment:
       - DB_NAME=postgres
       - DB_USER=postgres
