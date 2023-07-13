@@ -8,7 +8,7 @@ def fixtures(apps, schema_editor):
     if os.environ.get('DOCKER'):
         Entity = apps.get_model("sampleapp", "Entity")
         for i in range(100):
-            Entity.objects.create(sentence=f'This is number {i}', output='x')
+            Entity.objects.create(sentence=f'This is number {i}', output=[{'ent': 'the United States of America', 'label': 'Location'}])
 
 
 class Migration(migrations.Migration):
